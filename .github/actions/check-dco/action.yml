@@ -1,6 +1,12 @@
 name: "Check DCO"
 description: "Check Developer Certificate of Origin sign-offs on commits"
 
+inputs:
+  add-comments:
+    description: "Whether to add comments to the pull request"
+    required: false
+    default: "false"
+
 runs:
   using: "composite"
   steps:
@@ -8,7 +14,7 @@ runs:
       uses: KineticCafe/actions-dco@v1
 
     - name: Commit if DCO failed
-      if: failure()
+      if: failure() && inputs.add-comments == 'true'
       uses: actions/github-script@v7
       with:
         script: |
@@ -21,7 +27,7 @@ runs:
 
     # Remove all DCO comments once DCO check passes
     - name: Cleanup DCO comments
-      if: success()
+      if: success() && inputs.add-comments == 'true'
       uses: actions/github-script@v7
       with:
         script: |
