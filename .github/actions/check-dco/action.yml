@@ -6,15 +6,20 @@ inputs:
     description: "Whether to add comments to the pull request"
     required: false
     default: "false"
+  skip-label:
+    description: "Label that triggers skipping the DCO check"
+    required: false
+    default: "admin/skip-dco-check"
 
 runs:
   using: "composite"
   steps:
     - name: Check sign-off
+      if: ${{ !contains(github.event.pull_request.labels.*.name, inputs.skip-label) }}
       uses: KineticCafe/actions-dco@v1
 
     - name: Commit if DCO failed
-      if: failure() && inputs.add-comments == 'true'
+      if: failure() && inputs.add-comments == 'true' && !contains(github.event.pull_request.labels.*.name, inputs.skip-level)
       uses: actions/github-script@v7
       with:
         script: |
@@ -27,7 +32,7 @@ runs:
 
     # Remove all DCO comments once DCO check passes
     - name: Cleanup DCO comments
-      if: success() && inputs.add-comments == 'true'
+      if: success() && inputs.add-comments == 'true' && !contains(github.event.pull_request.labels.*.name, inputs.skip-level)
       uses: actions/github-script@v7
       with:
         script: |
